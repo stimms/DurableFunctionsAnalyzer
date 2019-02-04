@@ -18,7 +18,7 @@ namespace DurableFunctionsAnalyzer
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(DurableFunctionsAnalyzerCodeFixProvider)), Shared]
     public class DurableFunctionsAnalyzerCodeFixProvider : CodeFixProvider
     {
-        private const string title = "Make uppercase";
+        private const string title = "Ma";
 
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {

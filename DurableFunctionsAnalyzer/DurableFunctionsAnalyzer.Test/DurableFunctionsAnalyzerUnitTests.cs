@@ -12,61 +12,78 @@ namespace DurableFunctionsAnalyzer.Test
     public class UnitTest : CodeFixVerifier
     {
 
-        //No diagnostics expected to show up
         [TestMethod]
-        public void TestMethod1()
+        public void Should_not_trigger_on_empty()
         {
             var test = @"";
 
             VerifyCSharpDiagnostic(test);
         }
 
-        //Diagnostic and CodeFix both triggered and checked for
         [TestMethod]
-        public void TestMethod2()
+        public void Should_not_find_any_issue_with_correctly_named_functions()
         {
-            var test = @"
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Diagnostics;
+            var test = @"using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 
-    namespace ConsoleApplication1
+namespace ExternalInteraction
+{
+    public static class HireEmployee
     {
-        class TypeName
-        {   
+        [FunctionName(""HireEmployee"")]
+        public static async Task<Application> RunOrchestrator(
+            [OrchestrationTrigger] DurableOrchestrationContext context,
+            ILogger log)
+            {
+                var applications = context.GetInput<List<Application>>();
+                var approvals = await context.CallActivityAsync<List<Application>>(""ApplicationsFiltered"");
+                log.LogInformation($""Approval received. {approvals.Count} applicants approved"");
+                return approvals.OrderByDescending(x => x.Score).First();
+            }
+
+        [FunctionName(""ApplicationsFilteredNicely"")]
+        public static async Task Run(
+            [QueueTrigger(""approval-queue"")] Approval approval,
+            [OrchestrationClient] DurableOrchestrationClient client)
+        {
+            await client.RaiseEventAsync(approval.InstanceId, ""ApplicationsFiltered"", approval.Applications);
         }
-    }";
+    }
+}";
             var expected = new DiagnosticResult
             {
                 Id = "DurableFunctionsAnalyzer",
-                Message = String.Format("Type name '{0}' contains lowercase letters", "TypeName"),
+                Message = String.Format("Function name '{0}' does not exist", "ApplicationsFiltered"),
                 Severity = DiagnosticSeverity.Warning,
                 Locations =
                     new[] {
-                            new DiagnosticResultLocation("Test0.cs", 11, 15)
+                            new DiagnosticResultLocation("Test0.cs", 20, 39)
                         }
             };
 
             VerifyCSharpDiagnostic(test, expected);
 
-            var fixtest = @"
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Diagnostics;
+            //        var fixtest = @"
+            //using System;
+            //using System.Collections.Generic;
+            //using System.Linq;
+            //using System.Text;
+            //using System.Threading.Tasks;
+            //using System.Diagnostics;
 
-    namespace ConsoleApplication1
-    {
-        class TYPENAME
-        {   
-        }
-    }";
-            VerifyCSharpFix(test, fixtest);
+            //namespace ConsoleApplication1
+            //{
+            //    class TYPENAME
+            //    {   
+            //    }
+            //}";
+            //        VerifyCSharpFix(test, fixtest);
         }
 
         protected override CodeFixProvider GetCSharpCodeFixProvider()

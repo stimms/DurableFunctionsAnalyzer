@@ -25,27 +25,68 @@ namespace DurableFunctionsAnalyzer
         private static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
-
+        static List<string> _availableNames = new List<string>();
+        static List<(string name, SyntaxNode node)> _calledFunctions = new List<(string, SyntaxNode)>();
         public override void Initialize(AnalysisContext context)
         {
-            // TODO: Consider registering other actions that act on syntax instead of or in addition to symbols
-            // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/Analyzer%20Actions%20Semantics.md for more information
-            context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
+            context.RegisterCompilationStartAction(c =>
+            {
+                c.RegisterCompilationEndAction(cac =>
+                {
+                    foreach (var node in _calledFunctions)
+                    {
+                        if (!_availableNames.Contains(node.name))
+                        {
+                            cac.ReportDiagnostic(Diagnostic.Create(Rule, node.node.GetLocation(), node.name));
+                        }
+                    }
+                });
+            });
+            context.RegisterSyntaxTreeAction(AnalyzeSyntaxTree);
+            context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.InvocationExpression);
         }
 
-        private static void AnalyzeSymbol(SymbolAnalysisContext context)
+        private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
         {
-            // TODO: Replace the following code with your own analysis, generating Diagnostic objects for any issues you find
-            var namedTypeSymbol = (INamedTypeSymbol)context.Symbol;
-
-            // Find just those named type symbols with names containing lowercase letters.
-            if (namedTypeSymbol.Name.ToCharArray().Any(char.IsLower))
+            Console.Write("here");
+            var invocationExpression = context.Node as InvocationExpressionSyntax;
+            if (invocationExpression != null)
             {
-                // For all such symbols, produce a diagnostic.
-                var diagnostic = Diagnostic.Create(Rule, namedTypeSymbol.Locations[0], namedTypeSymbol.Name);
-
-                context.ReportDiagnostic(diagnostic);
+                var expression = invocationExpression.Expression as MemberAccessExpressionSyntax;
+                if (expression != null)
+                {
+                    var name = expression.Name;
+                    if (name.ToString().StartsWith("CallActivityAsync"))
+                    {
+                        var memberInfo = context.SemanticModel.GetSymbolInfo(invocationExpression).Symbol as IMethodSymbol;
+                        if (memberInfo != null)
+                        {
+                            var miName = memberInfo.ToString();
+                        }
+                        var functionName = invocationExpression.ArgumentList.Arguments.FirstOrDefault();
+                        if (functionName != null)
+                            _calledFunctions.Add((functionName.ToString().Trim('"'), context.Node));
+                    }
+                }
             }
+        }
+        private static void AnalyzeSyntaxTree(SyntaxTreeAnalysisContext context)
+        {
+            var root = context.Tree.GetCompilationUnitRoot(context.CancellationToken);
+            var encountered = false;
+            foreach (var node in root.DescendantTokens())
+            {
+                if (node.IsKind(SyntaxKind.IdentifierToken) && node.Text == "FunctionName")
+                {
+                    encountered = true;
+                }
+                if (node.IsKind(SyntaxKind.StringLiteralToken) && encountered)
+                {
+                    encountered = false;
+                    _availableNames.Add(node.Text.Trim('"'));
+                }
+            }
+
         }
     }
 }
