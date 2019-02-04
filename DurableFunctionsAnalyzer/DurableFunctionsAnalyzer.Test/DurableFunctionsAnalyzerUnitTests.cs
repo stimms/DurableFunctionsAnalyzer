@@ -59,7 +59,7 @@ namespace ExternalInteraction
             var expected = new DiagnosticResult
             {
                 Id = "DurableFunctionsAnalyzer",
-                Message = String.Format("Function name '{0}' does not exist", "ApplicationsFiltered"),
+                Message = String.Format("Azure function named '{0}' does not exist. Did you mean 'ApplicationsFilteredNicely'", "ApplicationsFiltered"),
                 Severity = DiagnosticSeverity.Warning,
                 Locations =
                     new[] {
@@ -93,7 +93,7 @@ namespace ExternalInteraction
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
         {
-            return new DurableFunctionsAnalyzerAnalyzer();
+            return new NameAnalyzerRegistration();
         }
     }
 }

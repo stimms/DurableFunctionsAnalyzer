@@ -71,7 +71,7 @@ namespace DurableFunctionsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Function name &apos;{0}&apos; does not exist.
+        ///   Looks up a localized string similar to Azure function named &apos;{0}&apos; does not exist. Did you mean &apos;{1}&apos;.
         /// </summary>
         internal static string AnalyzerMessageFormat {
             get {
