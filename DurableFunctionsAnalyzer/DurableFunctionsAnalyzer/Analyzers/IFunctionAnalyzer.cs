@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using DurableFunctionsAnalyzer.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,6 @@ namespace DurableFunctionsAnalyzer.Analyzers
 {
     interface IFunctionAnalyzer
     {
-        void ReportProblems(CompilationAnalysisContext cac, IEnumerable<(string name, string activityTriggerType)> availableFunctions, IEnumerable<(string name, SyntaxNode nameNode, SyntaxNode parameterNode, String parameterType)> calledFunctions);
+        void ReportProblems(CompilationAnalysisContext cac, IEnumerable<FunctionDefinition> availableFunctions, IEnumerable<FunctionCall> calledFunctions);
     }
 }

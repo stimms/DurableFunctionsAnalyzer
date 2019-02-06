@@ -1,4 +1,5 @@
 ﻿using DurableFunctionsAnalyzer.Extensions;
+using DurableFunctionsAnalyzer.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -27,17 +28,17 @@ namespace DurableFunctionsAnalyzer.Analyzers
             return availableNames.OrderBy(x => x.LevenshteinDistance(name)).First();
         }
 
-        public void ReportProblems(CompilationAnalysisContext cac, IEnumerable<(string name, string activityTriggerType)> availableFunctions, IEnumerable<(string name, SyntaxNode nameNode, SyntaxNode parameterNode, string parameterType)> calledFunctions)
+        public void ReportProblems(CompilationAnalysisContext cac, IEnumerable<FunctionDefinition> availableFunctions, IEnumerable<FunctionCall> calledFunctions)
         {
             foreach (var node in calledFunctions)
             {
                 if (!availableFunctions.Any())
                 {
-                    cac.ReportDiagnostic(Diagnostic.Create(MissingRule, node.nameNode.GetLocation(), node.name));
+                    cac.ReportDiagnostic(Diagnostic.Create(MissingRule, node.node.GetLocation(), node.name));
                 }
                 else if (!availableFunctions.Select(x => x.name).Contains(node.name))
                 {
-                    cac.ReportDiagnostic(Diagnostic.Create(CloseRule, node.nameNode.GetLocation(), node.name, GetClosestString(node.name, availableFunctions.Select(x => x.name))));
+                    cac.ReportDiagnostic(Diagnostic.Create(CloseRule, node.node.GetLocation(), node.name, GetClosestString(node.name, availableFunctions.Select(x => x.name))));
                 }
             }
         }

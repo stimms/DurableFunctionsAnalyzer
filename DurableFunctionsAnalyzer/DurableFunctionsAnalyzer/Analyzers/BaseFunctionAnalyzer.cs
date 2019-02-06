@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using DurableFunctionsAnalyzer.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -10,8 +11,8 @@ namespace DurableFunctionsAnalyzer.Analyzers
 {
     class BaseFunctionAnalyzer
     {
-        List<(string name, string activityTriggerType)> _availableFunctions = new List<(string, string)>();
-        List<(string name, SyntaxNode node, SyntaxNode parameterNode, String parameterType)> _calledFunctions = new List<(string, SyntaxNode, SyntaxNode, String)>();
+        List<FunctionDefinition> _availableFunctions = new List<FunctionDefinition>();
+        List<FunctionCall> _calledFunctions = new List<FunctionCall>();
         List<IFunctionAnalyzer> _analyzers = new List<IFunctionAnalyzer>();
 
         public void ReportProblems(CompilationAnalysisContext cac)
@@ -33,7 +34,7 @@ namespace DurableFunctionsAnalyzer.Analyzers
                 if (expression != null)
                 {
                     var name = expression.Name;
-                    if (name.ToString().StartsWith("CallActivityAsync"))
+                    if (name.ToString().StartsWith("CallActivityAsync") || name.ToString().StartsWith("CallActivityWithRetryAsync"))
                     {
                         var functionName = invocationExpression.ArgumentList.Arguments.FirstOrDefault();
                         var argumentType = invocationExpression.ArgumentList.Arguments.Last();
@@ -44,7 +45,7 @@ namespace DurableFunctionsAnalyzer.Analyzers
                         else
                             typeName = "System." + typeInfo.Type?.OriginalDefinition?.Name;
                         if (functionName != null && functionName.ToString().StartsWith("\""))
-                            _calledFunctions.Add((functionName.ToString().Trim('"'), functionName, argumentType, typeName));
+                            _calledFunctions.Add(new FunctionCall { name = functionName.ToString().Trim('"'), node = functionName, parameterNode = argumentType, parameterType = typeName });
                     }
                 }
             }
@@ -78,9 +79,17 @@ namespace DurableFunctionsAnalyzer.Analyzers
                                     {
                                         var typeInfo = context.SemanticModel.GetTypeInfo(kindName);
                                         if (typeInfo.Type.OriginalDefinition.ContainingNamespace.ToString() != "<global namespace>")
-                                            _availableFunctions.Add((functionName, typeInfo.Type.OriginalDefinition.ContainingNamespace + "." + typeInfo.Type.OriginalDefinition.Name));
+                                            _availableFunctions.Add(new FunctionDefinition
+                                            {
+                                                name = functionName,
+                                                activityTriggerType = typeInfo.Type.OriginalDefinition.ContainingNamespace + "." + typeInfo.Type.OriginalDefinition.Name
+                                            });
                                         else
-                                            _availableFunctions.Add((functionName, "System." + typeInfo.Type.OriginalDefinition.Name));
+                                            _availableFunctions.Add(new FunctionDefinition
+                                            {
+                                                name = functionName,
+                                                activityTriggerType = "System." + typeInfo.Type.OriginalDefinition.Name
+                                            });
                                         didAdd = true;
                                     }
                                 }
@@ -90,7 +99,10 @@ namespace DurableFunctionsAnalyzer.Analyzers
                 }
                 if (!didAdd)
                 {
-                    _availableFunctions.Add((functionName, null));
+                    _availableFunctions.Add(new FunctionDefinition
+                    {
+                        name = functionName
+                    });
                 }
             }
         }
