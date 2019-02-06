@@ -47,13 +47,8 @@ namespace DurableFunctionsAnalyzer.Analyzers
                     var name = expression.Name;
                     if (name.ToString().StartsWith("CallActivityAsync"))
                     {
-                        var memberInfo = context.SemanticModel.GetSymbolInfo(invocationExpression).Symbol as IMethodSymbol;
-                        if (memberInfo != null)
-                        {
-                            var miName = memberInfo.ToString();
-                        }
                         var functionName = invocationExpression.ArgumentList.Arguments.FirstOrDefault();
-                        if (functionName != null)
+                        if (functionName != null && functionName.ToString().StartsWith("\""))
                             _calledFunctions.Add((functionName.ToString().Trim('"'), context.Node));
                     }
                 }
