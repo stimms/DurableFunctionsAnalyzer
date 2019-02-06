@@ -22,13 +22,13 @@ Function calls in durable functions are written in a way which can introduce err
 The analyzers are distributed as a nuget package. To install it all you need to do is run
 
 ```
-dotnet add package DurableFunctionAnalyzer
+dotnet add package DurableFunctionsAnalyzer
 ```
 
 or
 
 ```
-install-package DurableFunctionAnalyzer
+Install-Package DurableFunctionsAnalyzer
 ```
 
 You also need to turn on `Enable full solution analysis` to see the warnings in Visual Studio. 
