@@ -1,5 +1,7 @@
 # Durable Functions Analyzer
 
+[![Build status](https://dev.azure.com/DurableFunctionAnalyzer/DurableFunctionAnalyzer/_apis/build/status/DurableFunctionAnalyzer)](https://dev.azure.com/DurableFunctionAnalyzer/DurableFunctionAnalyzer/_build/latest?definitionId=1)
+
 This is a collection of analyzers to save you from making some common mistakes with [Durable Azure Functions](https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-overview). 
 
 ![An example of one of the analyzers finding an incorrectly named function call](images/poc.png)
