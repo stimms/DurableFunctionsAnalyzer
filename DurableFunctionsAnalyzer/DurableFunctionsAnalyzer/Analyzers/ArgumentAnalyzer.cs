@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using DurableFunctionsAnalyzer.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace DurableFunctionsAnalyzer.Analyzers
         public static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
 
 
-        public void ReportProblems(CompilationAnalysisContext cac, IEnumerable<(string name, string activityTriggerType)> availableFunctions, IEnumerable<(string name, SyntaxNode nameNode, SyntaxNode parameterNode, string parameterType)> calledFunctions)
+        public void ReportProblems(CompilationAnalysisContext cac, IEnumerable<FunctionDefinition> availableFunctions, IEnumerable<FunctionCall> calledFunctions)
         {
             foreach (var node in calledFunctions)
             {
