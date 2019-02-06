@@ -6,71 +6,41 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace DurableFunctionsAnalyzer.Analyzers
 {
-    class NameAnalyzer
+    class NameAnalyzer : IFunctionAnalyzer
     {
-        List<string> _availableNames = new List<string>();
-        List<(string name, SyntaxNode node)> _calledFunctions = new List<(string, SyntaxNode)>();
-        private DiagnosticDescriptor rule;
+        public const string DiagnosticId = "DurableFunctionsNameAnalyzer";
+        private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.NameAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+        private static readonly LocalizableString CloseMessageFormat = new LocalizableResourceString(nameof(Resources.NameAnalyzerCloseMessageFormat), Resources.ResourceManager, typeof(Resources));
+        private static readonly LocalizableString MissingMessageFormat = new LocalizableResourceString(nameof(Resources.NameAnalyzerMissingMessageFormat), Resources.ResourceManager, typeof(Resources));
+        private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.NameAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+        private const string Category = "Naming";
 
-        public NameAnalyzer(DiagnosticDescriptor rule)
-        {
-            this.rule = rule;
-        }
+        public static DiagnosticDescriptor CloseRule = new DiagnosticDescriptor(DiagnosticId, Title, CloseMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
+        public static DiagnosticDescriptor MissingRule = new DiagnosticDescriptor(DiagnosticId, Title, MissingMessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
 
-        private string GetClosestString(string name, List<string> availableNames)
+
+        private string GetClosestString(string name, IEnumerable<string> availableNames)
         {
             return availableNames.OrderBy(x => x.LevenshteinDistance(name)).First();
         }
 
-        public void ReportProblems(CompilationAnalysisContext cac)
+        public void ReportProblems(CompilationAnalysisContext cac, IEnumerable<(string name, string activityTriggerType)> availableFunctions, IEnumerable<(string name, SyntaxNode nameNode, SyntaxNode parameterNode, string parameterType)> calledFunctions)
         {
-            foreach (var node in _calledFunctions)
+            foreach (var node in calledFunctions)
             {
-                if (!_availableNames.Contains(node.name))
+                if (!availableFunctions.Any())
                 {
-                    cac.ReportDiagnostic(Diagnostic.Create(rule, node.node.GetLocation(), node.name, GetClosestString(node.name, _availableNames)));
+                    cac.ReportDiagnostic(Diagnostic.Create(MissingRule, node.nameNode.GetLocation(), node.name));
+                }
+                else if (!availableFunctions.Select(x => x.name).Contains(node.name))
+                {
+                    cac.ReportDiagnostic(Diagnostic.Create(CloseRule, node.nameNode.GetLocation(), node.name, GetClosestString(node.name, availableFunctions.Select(x => x.name))));
                 }
             }
         }
-        public void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
-        {
-            var invocationExpression = context.Node as InvocationExpressionSyntax;
-            if (invocationExpression != null)
-            {
-                var expression = invocationExpression.Expression as MemberAccessExpressionSyntax;
-                if (expression != null)
-                {
-                    var name = expression.Name;
-                    if (name.ToString().StartsWith("CallActivityAsync"))
-                    {
-                        var functionName = invocationExpression.ArgumentList.Arguments.FirstOrDefault();
-                        if (functionName != null && functionName.ToString().StartsWith("\""))
-                            _calledFunctions.Add((functionName.ToString().Trim('"'), context.Node));
-                    }
-                }
-            }
-        }
-        public void AnalyzeSyntaxTree(SyntaxTreeAnalysisContext context)
-        {
-            var root = context.Tree.GetCompilationUnitRoot(context.CancellationToken);
-            var encountered = false;
-            foreach (var node in root.DescendantTokens())
-            {
-                if (node.IsKind(SyntaxKind.IdentifierToken) && node.Text == "FunctionName")
-                {
-                    encountered = true;
-                }
-                if (node.IsKind(SyntaxKind.StringLiteralToken) && encountered)
-                {
-                    encountered = false;
-                    _availableNames.Add(node.Text.Trim('"'));
-                }
-            }
 
-        }
     }
 }

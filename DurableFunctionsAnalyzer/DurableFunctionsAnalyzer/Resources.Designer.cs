@@ -62,29 +62,65 @@ namespace DurableFunctionsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Function call references unknown Azure Function..
+        ///   Looks up a localized string similar to Function call parameters don&apos;t match function.
         /// </summary>
-        internal static string AnalyzerDescription {
+        internal static string ArgumentAnalyzerDescription {
             get {
-                return ResourceManager.GetString("AnalyzerDescription", resourceCulture);
+                return ResourceManager.GetString("ArgumentAnalyzerDescription", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Azure function named &apos;{0}&apos; does not exist. Did you mean &apos;{1}&apos;.
+        ///   Looks up a localized string similar to Azure function named &apos;{0}&apos; takes a &apos;{1}&apos; but was given a &apos;{2}&apos;.
         /// </summary>
-        internal static string AnalyzerMessageFormat {
+        internal static string ArgumentAnalyzerMessageFormat {
             get {
-                return ResourceManager.GetString("AnalyzerMessageFormat", resourceCulture);
+                return ResourceManager.GetString("ArgumentAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Azure Durable Function Paramter Type Check.
+        /// </summary>
+        internal static string ArgumentAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("ArgumentAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Azure function named &apos;{0}&apos; does not exist. Did you mean &apos;{1}&apos;?.
+        /// </summary>
+        internal static string NameAnalyzerCloseMessageFormat {
+            get {
+                return ResourceManager.GetString("NameAnalyzerCloseMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Function call references unknown Azure Function..
+        /// </summary>
+        internal static string NameAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("NameAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Azure function named &apos;{0}&apos; does not exist. Could not find any function registrations..
+        /// </summary>
+        internal static string NameAnalyzerMissingMessageFormat {
+            get {
+                return ResourceManager.GetString("NameAnalyzerMissingMessageFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Azure Durable Function Name Check.
         /// </summary>
-        internal static string AnalyzerTitle {
+        internal static string NameAnalyzerTitle {
             get {
-                return ResourceManager.GetString("AnalyzerTitle", resourceCulture);
+                return ResourceManager.GetString("NameAnalyzerTitle", resourceCulture);
             }
         }
     }

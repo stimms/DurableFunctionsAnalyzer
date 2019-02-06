@@ -30,6 +30,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace ExternalInteraction
 {
@@ -87,6 +88,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace ExternalInteraction
 {
@@ -144,6 +146,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace ExternalInteraction
 {
@@ -171,12 +174,77 @@ namespace ExternalInteraction
 }";
             var expected = new DiagnosticResult
             {
-                Id = "DurableFunctionsAnalyzer",
-                Message = String.Format("Azure function named '{0}' does not exist. Did you mean 'ApplicationsFilteredNicely'", "ApplicationsFiltered"),
+                Id = "DurableFunctionsNameAnalyzer",
+                Message = String.Format("Azure function named '{0}' does not exist. Did you mean 'ApplicationsFilteredNicely'?", "ApplicationsFiltered"),
                 Severity = DiagnosticSeverity.Warning,
                 Locations =
                     new[] {
-                            new DiagnosticResultLocation("Test0.cs", 20, 39)
+                            new DiagnosticResultLocation("Test0.cs", 21, 84)
+                        }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+
+            //        var fixtest = @"
+            //using System;
+            //using System.Collections.Generic;
+            //using System.Linq;
+            //using System.Text;
+            //using System.Threading.Tasks;
+            //using System.Diagnostics;
+
+            //namespace ConsoleApplication1
+            //{
+            //    class TYPENAME
+            //    {   
+            //    }
+            //}";
+            //        VerifyCSharpFix(test, fixtest);
+        }
+
+        [TestMethod]
+        public void Should_find_when_no_function_has_been_declared()
+        {
+            var test = @"using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
+using System;
+
+namespace ExternalInteraction
+{
+    public static class HireEmployee
+    {
+        public static async Task<Application> RunOrchestrator(
+            [OrchestrationTrigger] DurableOrchestrationContext context,
+            ILogger log)
+            {
+                var applications = context.GetInput<List<Application>>();
+                var approvals = await context.CallActivityAsync<List<Application>>(""ApplicationsFiltered"");
+                log.LogInformation($""Approval received. {approvals.Count} applicants approved"");
+                return approvals.OrderByDescending(x => x.Score).First();
+            }
+
+        public static async Task Run(
+            [QueueTrigger(""approval-queue"")] Approval approval,
+            [OrchestrationClient] DurableOrchestrationClient client)
+        {
+            await client.RaiseEventAsync(approval.InstanceId, ""ApplicationsFiltered"", approval.Applications);
+        }
+    }
+}";
+            var expected = new DiagnosticResult
+            {
+                Id = "DurableFunctionsNameAnalyzer",
+                Message = String.Format("Azure function named '{0}' does not exist. Could not find any function registrations.", "ApplicationsFiltered"),
+                Severity = DiagnosticSeverity.Warning,
+                Locations =
+                    new[] {
+                            new DiagnosticResultLocation("Test0.cs", 20, 84)
                         }
             };
 

@@ -117,15 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AnalyzerDescription" xml:space="preserve">
+  <data name="ArgumentAnalyzerDescription" xml:space="preserve">
+    <value>Function call parameters don't match function</value>
+  </data>
+  <data name="ArgumentAnalyzerMessageFormat" xml:space="preserve">
+    <value>Azure function named '{0}' takes a '{1}' but was given a '{2}'</value>
+  </data>
+  <data name="ArgumentAnalyzerTitle" xml:space="preserve">
+    <value>Azure Durable Function Paramter Type Check</value>
+  </data>
+  <data name="NameAnalyzerCloseMessageFormat" xml:space="preserve">
+    <value>Azure function named '{0}' does not exist. Did you mean '{1}'?</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="NameAnalyzerDescription" xml:space="preserve">
     <value>Function call references unknown Azure Function.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
-  <data name="AnalyzerMessageFormat" xml:space="preserve">
-    <value>Azure function named '{0}' does not exist. Did you mean '{1}'</value>
-    <comment>The format-able message the diagnostic displays.</comment>
+  <data name="NameAnalyzerMissingMessageFormat" xml:space="preserve">
+    <value>Azure function named '{0}' does not exist. Could not find any function registrations.</value>
+    <comment>The format-able message when name analyzer can't find any function names</comment>
   </data>
-  <data name="AnalyzerTitle" xml:space="preserve">
+  <data name="NameAnalyzerTitle" xml:space="preserve">
     <value>Azure Durable Function Name Check</value>
     <comment>The title of the diagnostic.</comment>
   </data>
