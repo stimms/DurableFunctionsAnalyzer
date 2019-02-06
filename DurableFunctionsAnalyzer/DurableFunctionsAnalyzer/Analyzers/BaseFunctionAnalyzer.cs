@@ -37,9 +37,14 @@ namespace DurableFunctionsAnalyzer.Analyzers
                     {
                         var functionName = invocationExpression.ArgumentList.Arguments.FirstOrDefault();
                         var argumentType = invocationExpression.ArgumentList.Arguments.Last();
-                        var typeInfo = context.SemanticModel.GetTypeInfo(argumentType.ChildNodes().First()).Type?.OriginalDefinition?.ToString();
+                        var typeInfo = context.SemanticModel.GetTypeInfo(argumentType.ChildNodes().First());
+                        var typeName = "";
+                        if (typeInfo.Type.OriginalDefinition.ContainingNamespace.ToString() != "<global namespace>")
+                            typeName = typeInfo.Type.OriginalDefinition.ContainingNamespace + "." + typeInfo.Type?.OriginalDefinition?.Name;
+                        else
+                            typeName = "System." + typeInfo.Type?.OriginalDefinition?.Name;
                         if (functionName != null && functionName.ToString().StartsWith("\""))
-                            _calledFunctions.Add((functionName.ToString().Trim('"'), functionName, argumentType, typeInfo));
+                            _calledFunctions.Add((functionName.ToString().Trim('"'), functionName, argumentType, typeName));
                     }
                 }
             }
@@ -64,10 +69,18 @@ namespace DurableFunctionsAnalyzer.Analyzers
                                 if ((attribute as AttributeSyntax).Name.ToString() == "ActivityTrigger")
                                 {
                                     var kindName = parameter.ChildNodes().Where(x => x.IsKind(SyntaxKind.IdentifierName)).SingleOrDefault();
+                                    if (kindName == null)
+                                    {
+                                        //predefined types
+                                        kindName = parameter.ChildNodes().Where(x => x.IsKind(SyntaxKind.PredefinedType)).SingleOrDefault();
+                                    }
                                     if (kindName != null)
                                     {
                                         var typeInfo = context.SemanticModel.GetTypeInfo(kindName);
-                                        _availableFunctions.Add((functionName, typeInfo.Type.OriginalDefinition.ContainingNamespace + "." + typeInfo.Type.OriginalDefinition.Name ));
+                                        if (typeInfo.Type.OriginalDefinition.ContainingNamespace.ToString() != "<global namespace>")
+                                            _availableFunctions.Add((functionName, typeInfo.Type.OriginalDefinition.ContainingNamespace + "." + typeInfo.Type.OriginalDefinition.Name));
+                                        else
+                                            _availableFunctions.Add((functionName, "System." + typeInfo.Type.OriginalDefinition.Name));
                                         didAdd = true;
                                     }
                                 }
