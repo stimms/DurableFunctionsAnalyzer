@@ -56,6 +56,8 @@ namespace DurableFunctionsAnalyzer.Analyzers
                         }
                         var typeInfo = context.SemanticModel.GetTypeInfo(argumentType.ChildNodes().First());
                         var typeName = "";
+                        if (typeInfo.Type == null)
+                            return;
                         if (typeInfo.Type.OriginalDefinition.ContainingNamespace.ToString() != "<global namespace>")
                             typeName = typeInfo.Type.OriginalDefinition.ContainingNamespace + "." + typeInfo.Type?.OriginalDefinition?.Name;
                         else

@@ -26,10 +26,12 @@ namespace DurableFunctionsAnalyzer.Analyzers
                 var functionDefinition = availableFunctions.Where(x => x.Name == node.Name).SingleOrDefault();
                 if (functionDefinition != null)
                 {
-                    if (functionDefinition.ReturnType != node.ExpectedReturnType && 
+
+                    if (functionDefinition.ReturnType != node.ExpectedReturnType &&
                         !(functionDefinition.ReturnType == "System.Void" && node.ExpectedReturnType == "System.Threading.Tasks.Task"))//handle when the return type is void
                     {
-                        cac.ReportDiagnostic(Diagnostic.Create(Rule, node.ExpectedReturnTypeNode.GetLocation(), node.Name, functionDefinition.ReturnType, node.ExpectedReturnType));
+                        if ($"System.Threading.Tasks.Task<{functionDefinition.ReturnType}>" != node.ExpectedReturnType)//Handle cases where the activity isn't async
+                            cac.ReportDiagnostic(Diagnostic.Create(Rule, node.ExpectedReturnTypeNode.GetLocation(), node.Name, functionDefinition.ReturnType, node.ExpectedReturnType));
                     }
                 }
             }
