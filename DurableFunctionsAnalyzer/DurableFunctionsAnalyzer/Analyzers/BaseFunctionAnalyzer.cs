@@ -88,7 +88,10 @@ namespace DurableFunctionsAnalyzer.Analyzers
                 typeName = typeInfo.OriginalDefinition.ContainingNamespace + "." + typeInfo.OriginalDefinition?.Name;
             else
                 typeName = "System." + typeInfo.OriginalDefinition?.Name;
-            return typeName + genericType;
+            var returnType = typeName + genericType;
+            if (returnType == "System.Int")
+                return returnType + "32";
+            return returnType;
         }
 
         public void FindActivities(SyntaxNodeAnalysisContext context)
