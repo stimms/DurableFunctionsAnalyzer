@@ -47,7 +47,7 @@ namespace DurableFunctionsAnalyzer.Analyzers
                             .ChildNodes()
                             .Where(x=>x.IsKind(SyntaxKind.TypeArgumentList))?
                             .FirstOrDefault();
-                        var returnTypeName = "";
+                        var returnTypeName = "System.Threading.Tasks.Task";
                         if(returnType != null)
                         {
                             returnTypeName = GetQualifiedTypeName(context.SemanticModel.GetTypeInfo(returnType.ChildNodes().FirstOrDefault()).Type);
