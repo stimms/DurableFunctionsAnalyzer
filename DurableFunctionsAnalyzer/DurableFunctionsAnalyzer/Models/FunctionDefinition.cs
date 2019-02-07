@@ -6,7 +6,8 @@ namespace DurableFunctionsAnalyzer.Models
 {
     class FunctionDefinition
     {
-        public string name { get; set; }
-        public string activityTriggerType { get; set; }
+        public string Name { get; set; }
+        public string ActivityTriggerType { get; set; }
+        public string ReturnType { get; set; }
     }
 }

@@ -22,12 +22,12 @@ namespace DurableFunctionsAnalyzer.Analyzers
         {
             foreach (var node in calledFunctions)
             {
-                if (availableFunctions.Where(x => x.name == node.name).Any())
+                if (availableFunctions.Where(x => x.Name == node.Name).Any())
                 {
-                    var functionDefinition = availableFunctions.Where(x => x.name == node.name).SingleOrDefault();
-                    if (functionDefinition.activityTriggerType != node.parameterType)
+                    var functionDefinition = availableFunctions.Where(x => x.Name == node.Name).SingleOrDefault();
+                    if (functionDefinition.ActivityTriggerType != node.ParameterType)
                     {
-                        cac.ReportDiagnostic(Diagnostic.Create(Rule, node.parameterNode.GetLocation(), node.name, functionDefinition.activityTriggerType, node.parameterType));
+                        cac.ReportDiagnostic(Diagnostic.Create(Rule, node.ParameterNode.GetLocation(), node.Name, functionDefinition.ActivityTriggerType, node.ParameterType));
                     }
                 }
               

@@ -42,13 +42,13 @@ namespace ExternalInteraction
             ILogger log)
             {
                 var applications = context.GetInput<List<Application>>();
-                var approvals = await context.CallActivityAsync<List<Application>>(""ApplicationsFiltered"", ""An approval"");
+                var approvals = await context.CallActivityAsync<string>(""ApplicationsFiltered"", ""An approval"");
                 log.LogInformation($""Approval received. {approvals.Count} applicants approved"");
                 return approvals.OrderByDescending(x => x.Score).First();
             }
 
         [FunctionName(""ApplicationsFiltered"")]
-        public static async Task Run(
+        public static async Task<string> Run(
             [ActivityTrigger(""approval-queue"")] String approval,
             [OrchestrationClient] DurableOrchestrationClient client)
         {
@@ -342,7 +342,7 @@ namespace ExternalInteraction
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
         {
-            return new NameAnalyzerRegistration();
+            return new AnalyzerRegistration();
         }
     }
 }

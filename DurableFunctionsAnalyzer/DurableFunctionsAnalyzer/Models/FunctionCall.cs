@@ -7,9 +7,11 @@ namespace DurableFunctionsAnalyzer.Models
 {
     class FunctionCall
     {
-        public string name { get; set; }
-        public SyntaxNode node { get; set; }
-        public SyntaxNode parameterNode { get; set; }
-        public String parameterType { get; set; }
+        public string Name { get; set; }
+        public SyntaxNode NameNode { get; set; }
+        public SyntaxNode ParameterNode { get; set; }
+        public String ParameterType { get; set; }
+        public string ExpectedReturnType { get; set; }
+        public SyntaxNode ExpectedReturnTypeNode { get; set; }
     }
 }

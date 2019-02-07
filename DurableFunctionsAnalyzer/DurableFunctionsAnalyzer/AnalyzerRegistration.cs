@@ -13,7 +13,7 @@ using DurableFunctionsAnalyzer.Analyzers;
 namespace DurableFunctionsAnalyzer
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class NameAnalyzerRegistration : DiagnosticAnalyzer
+    public class AnalyzerRegistration : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "DurableFunctionsAnalyzer";
 
@@ -22,7 +22,10 @@ namespace DurableFunctionsAnalyzer
         {
             get
             {
-                return ImmutableArray.Create(NameAnalyzer.CloseRule, NameAnalyzer.MissingRule, ArgumentAnalyzer.Rule);
+                return ImmutableArray.Create(NameAnalyzer.CloseRule,
+                    NameAnalyzer.MissingRule,
+                    ArgumentAnalyzer.Rule,
+                    ReturnTypeAnalyzer.Rule);
             }
         }
 
@@ -30,9 +33,11 @@ namespace DurableFunctionsAnalyzer
         {
             var nameAnalyzer = new NameAnalyzer();
             var argumentAnalyzer = new ArgumentAnalyzer();
+            var returnTypeAnalyzer = new ReturnTypeAnalyzer();
             var baseAnalyzer = new BaseFunctionAnalyzer();
             baseAnalyzer.RegisterAnalyzer(nameAnalyzer);
             baseAnalyzer.RegisterAnalyzer(argumentAnalyzer);
+            baseAnalyzer.RegisterAnalyzer(returnTypeAnalyzer);
             context.RegisterCompilationStartAction(c =>
             {
                 c.RegisterCompilationEndAction(baseAnalyzer.ReportProblems);
