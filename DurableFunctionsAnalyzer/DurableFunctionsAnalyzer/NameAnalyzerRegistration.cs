@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
+using DurableFunctionsAnalyzer.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using DurableFunctionsAnalyzer.Extensions;
-using DurableFunctionsAnalyzer.Analyzers;
+using System;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace DurableFunctionsAnalyzer
 {
@@ -22,7 +18,12 @@ namespace DurableFunctionsAnalyzer
         {
             get
             {
-                return ImmutableArray.Create(NameAnalyzer.CloseRule, NameAnalyzer.MissingRule, ArgumentAnalyzer.Rule);
+                return ImmutableArray.Create(
+                    NameAnalyzer.CloseRule,
+                    NameAnalyzer.MissingRule,
+                    ArgumentAnalyzer.Rule,
+                    ReturnTypeAnalyzer.Rule,
+                    OrchestrationTriggerAnnotationAnalyzer.Rule);
             }
         }
 
@@ -31,8 +32,11 @@ namespace DurableFunctionsAnalyzer
             var nameAnalyzer = new NameAnalyzer();
             var argumentAnalyzer = new ArgumentAnalyzer();
             var baseAnalyzer = new BaseFunctionAnalyzer();
+            var orchestrationTriggerAnalyzer = new OrchestrationTriggerAnnotationAnalyzer();
             baseAnalyzer.RegisterAnalyzer(nameAnalyzer);
             baseAnalyzer.RegisterAnalyzer(argumentAnalyzer);
+            baseAnalyzer.RegisterAnalyzer(returnTypeAnalyzer);
+            context.RegisterSyntaxNodeAction(orchestrationTriggerAnalyzer.FindOrchestrationTriggers, SyntaxKind.Attribute);
             context.RegisterCompilationStartAction(c =>
             {
                 c.RegisterCompilationEndAction(baseAnalyzer.ReportProblems);
