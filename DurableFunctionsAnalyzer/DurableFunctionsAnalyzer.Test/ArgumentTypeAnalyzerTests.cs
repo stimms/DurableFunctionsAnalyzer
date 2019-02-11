@@ -19,47 +19,7 @@ namespace DurableFunctionsAnalyzer.Test
 
             VerifyCSharpDiagnostic(test);
         }
-        [TestMethod]
-        public void Should_not_find_any_issue_with_string_keyword()
-        {
-            var test = @"using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Logging;
-
-namespace ExternalInteraction
-{
-    public static class HireEmployee
-    {
-        [FunctionName(""HireEmployee"")]
-        public static async Task<Application> RunOrchestrator(
-            [OrchestrationTrigger] DurableOrchestrationContext context,
-            ILogger log)
-            {
-                var applications = context.GetInput<List<Application>>();
-                var approvals = await context.CallActivityAsync<List<Application>>(""ApplicationsFiltered"", new String(""));
-                log.LogInformation($""Approval received. {approvals.Count} applicants approved"");
-                return approvals.OrderByDescending(x => x.Score).First();
-            }
-
-        [FunctionName(""ApplicationsFiltered"")]
-        public static async Task Run(
-            [ActivityTrigger] string userName,
-            [OrchestrationClient] DurableOrchestrationClient client)
-        {
-            await client.RaiseEventAsync(approval.InstanceId, ""ApplicationsFiltered"", approval.Applications);
-        }
-    }
-}";
-
-            VerifyCSharpDiagnostic(test);
-
-        }
-
+   
         [TestMethod]
         public void Should_not_find_any_issue_with_correctly_function_parameter()
         {
@@ -82,13 +42,13 @@ namespace ExternalInteraction
             ILogger log)
             {
                 var applications = context.GetInput<List<Application>>();
-                var approvals = await context.CallActivityAsync<List<Application>>(""ApplicationsFiltered"", new String(""));
+                var approvals = await context.CallActivityAsync<List<String>>(""ApplicationsFiltered"", new String(""));
                 log.LogInformation($""Approval received. {approvals.Count} applicants approved"");
                 return approvals.OrderByDescending(x => x.Score).First();
             }
 
         [FunctionName(""ApplicationsFiltered"")]
-        public static async Task Run(
+        public static async Task<List<string>> Run(
             [ActivityTrigger] String userName,
             [OrchestrationClient] DurableOrchestrationClient client)
         {
@@ -100,6 +60,9 @@ namespace ExternalInteraction
             VerifyCSharpDiagnostic(test);
             
         }
+
+       
+
 
         [TestMethod]
         public void Should_find_issue_with_incorrect_function_parameter()
@@ -124,13 +87,13 @@ namespace ExternalInteraction
             ILogger log)
             {
                 var applications = context.GetInput<List<Application>>();
-                var approvals = await context.CallActivityAsync<List<Application>>(""ApplicationsFiltered"", Guid.NewGuid());
+                var approvals = await context.CallActivityAsync<List<int>>(""ApplicationsFiltered"", Guid.NewGuid());
                 log.LogInformation($""Approval received. {approvals.Count} applicants approved"");
                 return approvals.OrderByDescending(x => x.Score).First();
             }
 
         [FunctionName(""ApplicationsFiltered"")]
-        public static async Task Run(
+        public static async Task<List<int>> Run(
             [ActivityTrigger] String userName,
             [OrchestrationClient] DurableOrchestrationClient client)
         {
@@ -145,7 +108,7 @@ namespace ExternalInteraction
                 Severity = DiagnosticSeverity.Warning,
                 Locations =
                     new[] {
-                            new DiagnosticResultLocation("Test0.cs", 21, 108)
+                            new DiagnosticResultLocation("Test0.cs", 21, 100)
                         }
             };
 
@@ -159,7 +122,7 @@ namespace ExternalInteraction
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
         {
-            return new NameAnalyzerRegistration();
+            return new AnalyzerRegistration();
         }
     }
 }

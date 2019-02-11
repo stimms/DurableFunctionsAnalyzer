@@ -1,8 +1,6 @@
 ﻿using DurableFunctionsAnalyzer.Extensions;
 using DurableFunctionsAnalyzer.Models;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -34,11 +32,11 @@ namespace DurableFunctionsAnalyzer.Analyzers
             {
                 if (!availableFunctions.Any())
                 {
-                    cac.ReportDiagnostic(Diagnostic.Create(MissingRule, node.node.GetLocation(), node.name));
+                    cac.ReportDiagnostic(Diagnostic.Create(MissingRule, node.NameNode.GetLocation(), node.Name));
                 }
-                else if (!availableFunctions.Select(x => x.name).Contains(node.name))
+                else if (!availableFunctions.Select(x => x.Name).Contains(node.Name))
                 {
-                    cac.ReportDiagnostic(Diagnostic.Create(CloseRule, node.node.GetLocation(), node.name, GetClosestString(node.name, availableFunctions.Select(x => x.name))));
+                    cac.ReportDiagnostic(Diagnostic.Create(CloseRule, node.NameNode.GetLocation(), node.Name, GetClosestString(node.Name, availableFunctions.Select(x => x.Name))));
                 }
             }
         }

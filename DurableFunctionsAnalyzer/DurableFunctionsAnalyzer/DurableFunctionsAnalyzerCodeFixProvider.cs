@@ -22,7 +22,7 @@ namespace DurableFunctionsAnalyzer
 
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            get { return ImmutableArray.Create(NameAnalyzerRegistration.DiagnosticId); }
+            get { return ImmutableArray.Create(AnalyzerRegistration.DiagnosticId); }
         }
 
         public sealed override FixAllProvider GetFixAllProvider()

@@ -123,5 +123,32 @@ namespace DurableFunctionsAnalyzer {
                 return ResourceManager.GetString("NameAnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Function return type doesn&apos;t match.
+        /// </summary>
+        internal static string ReturnTypeAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("ReturnTypeAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Azure function named &apos;{0}&apos; returns &apos;{1}&apos; but &apos;{2}&apos; is expected.
+        /// </summary>
+        internal static string ReturnTypeAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("ReturnTypeAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Azure Durable Function Return Type Check.
+        /// </summary>
+        internal static string ReturnTypeAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("ReturnTypeAnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }
