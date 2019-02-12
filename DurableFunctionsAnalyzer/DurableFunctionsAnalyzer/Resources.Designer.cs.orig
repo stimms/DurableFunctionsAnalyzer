@@ -125,6 +125,7 @@ namespace DurableFunctionsAnalyzer {
         }
         
         /// <summary>
+<<<<<<< HEAD
         ///   Looks up a localized string similar to OrchestrationTrigger must be attached to a DurableOrchestrationContext.
         /// </summary>
         internal static string OrchestrationTriggerAnalyzerDescription {
@@ -152,6 +153,8 @@ namespace DurableFunctionsAnalyzer {
         }
         
         /// <summary>
+=======
+>>>>>>> origin/master
         ///   Looks up a localized string similar to Function return type doesn&apos;t match.
         /// </summary>
         internal static string ReturnTypeAnalyzerDescription {

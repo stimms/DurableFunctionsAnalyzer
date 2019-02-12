@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace DurableFunctionsAnalyzer.Analyzers
@@ -17,8 +18,15 @@ namespace DurableFunctionsAnalyzer.Analyzers
 
         public void ReportProblems(CompilationAnalysisContext cac)
         {
-            foreach (var analyzer in _analyzers)
-                analyzer.ReportProblems(cac, _availableFunctions, _calledFunctions);
+            try
+            {
+                foreach (var analyzer in _analyzers)
+                    analyzer.ReportProblems(cac, _availableFunctions, _calledFunctions);
+            }catch(Exception ex)
+            {
+                File.WriteAllText(@"c:\temp\analyzer.txt", ex.ToString());
+                throw;
+            }
         }
 
         public void RegisterAnalyzer(IFunctionAnalyzer analyzer)

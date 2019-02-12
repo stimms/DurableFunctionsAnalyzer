@@ -18,12 +18,19 @@ namespace DurableFunctionsAnalyzer
         {
             get
             {
+<<<<<<< HEAD:DurableFunctionsAnalyzer/DurableFunctionsAnalyzer/NameAnalyzerRegistration.cs
                 return ImmutableArray.Create(
                     NameAnalyzer.CloseRule,
                     NameAnalyzer.MissingRule,
                     ArgumentAnalyzer.Rule,
                     ReturnTypeAnalyzer.Rule,
                     OrchestrationTriggerAnnotationAnalyzer.Rule);
+=======
+                return ImmutableArray.Create(NameAnalyzer.CloseRule,
+                    NameAnalyzer.MissingRule,
+                    ArgumentAnalyzer.Rule,
+                    ReturnTypeAnalyzer.Rule);
+>>>>>>> origin/master:DurableFunctionsAnalyzer/DurableFunctionsAnalyzer/AnalyzerRegistration.cs
             }
         }
 
@@ -37,7 +44,10 @@ namespace DurableFunctionsAnalyzer
             baseAnalyzer.RegisterAnalyzer(nameAnalyzer);
             baseAnalyzer.RegisterAnalyzer(argumentAnalyzer);
             baseAnalyzer.RegisterAnalyzer(returnTypeAnalyzer);
+<<<<<<< HEAD:DurableFunctionsAnalyzer/DurableFunctionsAnalyzer/NameAnalyzerRegistration.cs
             context.RegisterSyntaxNodeAction(orchestrationTriggerAnalyzer.FindOrchestrationTriggers, SyntaxKind.Attribute);
+=======
+>>>>>>> origin/master:DurableFunctionsAnalyzer/DurableFunctionsAnalyzer/AnalyzerRegistration.cs
             context.RegisterCompilationStartAction(c =>
             {
                 c.RegisterCompilationEndAction(baseAnalyzer.ReportProblems);

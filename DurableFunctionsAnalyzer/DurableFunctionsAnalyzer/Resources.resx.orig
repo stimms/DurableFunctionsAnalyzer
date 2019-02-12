@@ -142,6 +142,7 @@
     <value>Azure Durable Function Name Check</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+<<<<<<< HEAD
   <data name="OrchestrationTriggerAnalyzerDescription" xml:space="preserve">
     <value>OrchestrationTrigger must be attached to a DurableOrchestrationContext</value>
   </data>
@@ -151,6 +152,8 @@
   <data name="OrchestrationTriggerAnalyzerTitle" xml:space="preserve">
     <value>Orchestration Trigger Usage</value>
   </data>
+=======
+>>>>>>> origin/master
   <data name="ReturnTypeAnalyzerDescription" xml:space="preserve">
     <value>Function return type doesn't match</value>
   </data>
