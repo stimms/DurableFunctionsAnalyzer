@@ -9,7 +9,7 @@ using System.Linq;
 namespace DurableFunctionsAnalyzer
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class NameAnalyzerRegistration : DiagnosticAnalyzer
+    public class AnalyzerRegistration : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "DurableFunctionsAnalyzer";
 
@@ -31,6 +31,7 @@ namespace DurableFunctionsAnalyzer
         {
             var nameAnalyzer = new NameAnalyzer();
             var argumentAnalyzer = new ArgumentAnalyzer();
+            var returnTypeAnalyzer = new ReturnTypeAnalyzer();
             var baseAnalyzer = new BaseFunctionAnalyzer();
             var orchestrationTriggerAnalyzer = new OrchestrationTriggerAnnotationAnalyzer();
             baseAnalyzer.RegisterAnalyzer(nameAnalyzer);

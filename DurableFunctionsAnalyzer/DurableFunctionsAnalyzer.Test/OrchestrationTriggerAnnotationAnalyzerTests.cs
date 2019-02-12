@@ -21,7 +21,7 @@ namespace DurableFunctionsAnalyzer.Test
         }
 
         [TestMethod]
-        public void Should_not_find_any_issue_with_object()
+        public void Should_find_issue_with_object()
         {
             var test = @"using System.Collections.Generic;
 using System.Linq;

@@ -22,10 +22,9 @@ namespace DurableFunctionsAnalyzer.Analyzers
         {
             if (context.Node.ToString() == "OrchestrationTrigger")
             {
-                var children = context.Node.ChildNodes();
                 var parameter = context.Node.Parent.Parent;
                 var identifierNames = parameter.ChildNodes().Where(x => x.IsKind(SyntaxKind.IdentifierName));
-                if(!identifierNames.Any())
+                if(!identifierNames.Any() || identifierNames.First().ToString()!= "DurableOrchestrationContext")
                 {
                     context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation()));
                 }
