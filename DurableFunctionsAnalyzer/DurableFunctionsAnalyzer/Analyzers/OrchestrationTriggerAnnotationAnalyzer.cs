@@ -24,7 +24,7 @@ namespace DurableFunctionsAnalyzer.Analyzers
             {
                 var parameter = context.Node.Parent.Parent;
                 var identifierNames = parameter.ChildNodes().Where(x => x.IsKind(SyntaxKind.IdentifierName));
-                if(!identifierNames.Any() || identifierNames.First().ToString()!= "DurableOrchestrationContext")
+                if(!identifierNames.Any() || (identifierNames.First().ToString()!= "DurableOrchestrationContext" && identifierNames.First().ToString() != "DurableOrchestrationContextBase"))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation()));
                 }

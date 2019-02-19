@@ -58,7 +58,7 @@ namespace ExternalInteraction
         }
 
         [TestMethod]
-        public void Should_not_find_any_issue_with_key_word()
+        public void Should_find_any_issue_with_key_word()
         {
             var test = @"using System.Collections.Generic;
 using System.Linq;
@@ -120,6 +120,35 @@ namespace ExternalInteraction
             }
 }";
             
+            VerifyCSharpDiagnostic(test);
+        }
+
+
+        [TestMethod]
+        public void Should_not_find_any_issue_with_orchestration_trigger_on_context_base()
+        {
+            var test = @"using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
+
+namespace ExternalInteraction
+{
+    public static class HireEmployee
+    {
+        [FunctionName(""HireEmployee"")]
+        public static async Task<Application> RunOrchestrator(
+            [OrchestrationTrigger] DurableOrchestrationContextBase context,
+            ILogger log)
+            {
+               
+            }
+}";
+
             VerifyCSharpDiagnostic(test);
         }
 
