@@ -63,6 +63,61 @@ namespace ExternalInteraction
 
 
         [TestMethod]
+        public void Should_not_find_any_issue_with_open_generic_function_parameter()
+        {
+            var test = @"using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
+
+namespace ExternalInteraction
+{
+    public class EatIceCream
+    {
+        public string Flavour { get; set; }
+    }
+
+    public class Command<T>
+    {
+        public T WhatToEat { get; set; }
+        public Command()
+        {
+            
+        }
+    }
+    public static class HireEmployee
+    {
+        [FunctionName(""ConsumeDessert"")]
+        public static async Task<Application> RunOrchestrator(
+            [OrchestrationTrigger] DurableOrchestrationContext context,
+            ILogger log)
+            {
+                var applications = context.GetInput<List<Application>>();
+                var approvals = await context.CallActivityAsync<List<String>>(""Consume"", new Command<EatIceCream>());
+                log.LogInformation($""Approval received. {approvals.Count} applicants approved"");
+                return approvals.OrderByDescending(x => x.Score).First();
+            }
+
+        [FunctionName(""Consume"")]
+        public static async Task<List<string>> Run(
+            [ActivityTrigger] Command<EatIceCream> command,
+            [OrchestrationClient] DurableOrchestrationClient client)
+        {
+            await client.RaiseEventAsync(approval.InstanceId, ""AllIceCreamEaten"");
+        }
+    }
+}";
+
+            VerifyCSharpDiagnostic(test);
+
+        }
+
+
+        [TestMethod]
         public void Should_not_crash_on_real_null_argument()
         {
             var test = @"using System;
