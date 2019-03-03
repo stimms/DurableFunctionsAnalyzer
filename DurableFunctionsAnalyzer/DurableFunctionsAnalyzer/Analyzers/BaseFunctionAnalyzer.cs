@@ -127,7 +127,7 @@ namespace DurableFunctionsAnalyzer.Analyzers
                             {
                                 if ((attribute as AttributeSyntax).Name.ToString() == "ActivityTrigger")
                                 {
-                                    var kindName = parameter.ChildNodes().Where(x => x.IsKind(SyntaxKind.IdentifierName)).SingleOrDefault();
+                                    var kindName = parameter.ChildNodes().Where(x => x.IsKind(SyntaxKind.IdentifierName) || x.IsKind(SyntaxKind.GenericName)).SingleOrDefault();
                                     if (kindName == null)
                                     {
                                         //predefined types
