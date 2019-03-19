@@ -19,7 +19,47 @@ namespace DurableFunctionsAnalyzer.Test
 
             VerifyCSharpDiagnostic(test);
         }
-   
+
+        [TestMethod]
+        public void Should_not_find_any_issue_with_tuple_parameter()
+        {
+            var test = @"using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
+
+namespace ExternalInteraction
+{
+    public static class HireEmployee
+    {
+        [FunctionName(""HireEmployee"")]
+        public static async Task<Application> RunOrchestrator(
+            [OrchestrationTrigger] DurableOrchestrationContext context,
+            ILogger log)
+            {
+                var applications = context.GetInput<List<Application>>();
+                var approvals = await context.CallActivityAsync<List<String>>(""ApplicationsFiltered"", (new String(""a string""), 1));
+                log.LogInformation($""Approval received. {approvals.Count} applicants approved"");
+                return approvals.OrderByDescending(x => x.Score).First();
+            }
+
+        [FunctionName(""ApplicationsFiltered"")]
+        public static async Task<List<string>> Run(
+            [ActivityTrigger] (String userName, int Length),
+            [OrchestrationClient] DurableOrchestrationClient client)
+        {
+            await client.RaiseEventAsync(approval.InstanceId, ""ApplicationsFiltered"", approval.Applications);
+        }
+    }
+}";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
         [TestMethod]
         public void Should_not_find_any_issue_with_correctly_function_parameter()
         {
@@ -57,8 +97,7 @@ namespace ExternalInteraction
     }
 }";
             
-            VerifyCSharpDiagnostic(test);
-            
+            VerifyCSharpDiagnostic(test); 
         }
 
 

@@ -22,7 +22,8 @@ namespace DurableFunctionsAnalyzer.Analyzers
             {
                 foreach (var analyzer in _analyzers)
                     analyzer.ReportProblems(cac, _availableFunctions, _calledFunctions);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 File.WriteAllText(@"c:\temp\analyzer.txt", ex.ToString());
                 throw;
@@ -38,7 +39,7 @@ namespace DurableFunctionsAnalyzer.Analyzers
             var invocationExpression = context.Node as InvocationExpressionSyntax;
             if (invocationExpression != null)
             {
-        
+
                 var expression = invocationExpression.Expression as MemberAccessExpressionSyntax;
                 if (expression != null)
                 {
@@ -47,29 +48,26 @@ namespace DurableFunctionsAnalyzer.Analyzers
                     {
                         var functionName = invocationExpression.ArgumentList.Arguments.FirstOrDefault();
                         var argumentType = invocationExpression.ArgumentList.Arguments.Last();
-                        var returnType = invocationExpression.ChildNodes().Where(x=>x.IsKind(SyntaxKind.SimpleMemberAccessExpression))
+                        var returnType = invocationExpression.ChildNodes().Where(x => x.IsKind(SyntaxKind.SimpleMemberAccessExpression))
                             .FirstOrDefault()?
                             .ChildNodes()
                             .Where(x => x.IsKind(SyntaxKind.GenericName))
                             .FirstOrDefault()?
                             .ChildNodes()
-                            .Where(x=>x.IsKind(SyntaxKind.TypeArgumentList))?
+                            .Where(x => x.IsKind(SyntaxKind.TypeArgumentList))?
                             .FirstOrDefault();
                         var returnTypeName = "System.Threading.Tasks.Task";
-                        if(returnType != null)
+                        if (returnType != null)
                         {
                             returnTypeName = GetQualifiedTypeName(context.SemanticModel.GetTypeInfo(returnType.ChildNodes().FirstOrDefault()).Type);
                             returnTypeName = "System.Threading.Tasks.Task<" + returnTypeName + ">";
-                            
+
                         }
                         var typeInfo = context.SemanticModel.GetTypeInfo(argumentType.ChildNodes().First());
                         var typeName = "";
                         if (typeInfo.Type == null)
                             return;
-                        if (typeInfo.Type.OriginalDefinition.ContainingNamespace.ToString() != "<global namespace>")
-                            typeName = typeInfo.Type.OriginalDefinition.ContainingNamespace + "." + typeInfo.Type?.OriginalDefinition?.Name;
-                        else
-                            typeName = "System." + typeInfo.Type?.OriginalDefinition?.Name;
+                        typeName = GetQualifiedTypeName(typeInfo.Type);
                         if (functionName != null && functionName.ToString().StartsWith("\""))
                             _calledFunctions.Add(new FunctionCall
                             {
@@ -87,11 +85,17 @@ namespace DurableFunctionsAnalyzer.Analyzers
 
         private string GetQualifiedTypeName(ITypeSymbol typeInfo)
         {
-            var b = typeInfo as INamedTypeSymbol;
-            var genericType = "";
-            if (b.TypeArguments.Any())
+            var tupleunderlyingtype = (typeInfo as INamedTypeSymbol).TupleUnderlyingType;
+            if (tupleunderlyingtype != null)
             {
-                 genericType = "<" +  GetQualifiedTypeName(b.TypeArguments.First()) + ">";
+                return $"Tuple<{string.Join(", ", tupleunderlyingtype.TypeArguments.Select(x => GetQualifiedTypeName(x)))}>";
+            }
+
+            var namedSymbol = typeInfo as INamedTypeSymbol;
+            var genericType = "";
+            if (namedSymbol.TypeArguments.Any())
+            {
+                genericType = "<" + GetQualifiedTypeName(namedSymbol.TypeArguments.First()) + ">";
             }
             var typeName = "";
             if (typeInfo.OriginalDefinition.ContainingNamespace.ToString() != "<global namespace>")
@@ -127,7 +131,9 @@ namespace DurableFunctionsAnalyzer.Analyzers
                             {
                                 if ((attribute as AttributeSyntax).Name.ToString() == "ActivityTrigger")
                                 {
-                                    var kindName = parameter.ChildNodes().Where(x => x.IsKind(SyntaxKind.IdentifierName) || x.IsKind(SyntaxKind.GenericName)).SingleOrDefault();
+                                    var kindName = parameter.ChildNodes().Where(x => x.IsKind(SyntaxKind.IdentifierName) ||
+                                                                                     x.IsKind(SyntaxKind.GenericName) ||
+                                                                                     x.IsKind(SyntaxKind.TupleType)).SingleOrDefault();
                                     if (kindName == null)
                                     {
                                         //predefined types
@@ -136,20 +142,16 @@ namespace DurableFunctionsAnalyzer.Analyzers
                                     if (kindName != null)
                                     {
                                         var typeInfo = context.SemanticModel.GetTypeInfo(kindName);
-                                        if (typeInfo.Type.OriginalDefinition.ContainingNamespace.ToString() != "<global namespace>")
-                                            _availableFunctions.Add(new FunctionDefinition
-                                            {
-                                                Name = functionName,
-                                                ActivityTriggerType = typeInfo.Type.OriginalDefinition.ContainingNamespace + "." + typeInfo.Type.OriginalDefinition.Name,
-                                                ReturnType =  GetQualifiedTypeName(context.SemanticModel.GetTypeInfo((methodDeclaration as MethodDeclarationSyntax).ReturnType).Type)
-                                            });
-                                        else
-                                            _availableFunctions.Add(new FunctionDefinition
-                                            {
-                                                Name = functionName,
-                                                ActivityTriggerType = "System." + typeInfo.Type.OriginalDefinition.Name,
-                                                ReturnType = GetQualifiedTypeName(context.SemanticModel.GetTypeInfo((methodDeclaration as MethodDeclarationSyntax).ReturnType).Type)
-                                            });
+                                        //((Microsoft.CodeAnalysis.CSharp.Symbols.TupleTypeSymbol)typeInfo.Type).TupleElements
+                                        string returnTypeName = "";
+                                        returnTypeName = GetQualifiedTypeName(context.SemanticModel.GetTypeInfo((methodDeclaration as MethodDeclarationSyntax).ReturnType).Type);
+                                        _availableFunctions.Add(new FunctionDefinition
+                                        {
+                                            Name = functionName,
+                                            ActivityTriggerType = GetQualifiedTypeName(typeInfo.Type),
+                                            ReturnType = returnTypeName
+                                        });
+
                                         didAdd = true;
                                     }
                                 }
